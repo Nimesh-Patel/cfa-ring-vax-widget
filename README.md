@@ -1,18 +1,83 @@
 # Ring vaccination widget
 
-⚠️ This is a work in progress
-
 ## Overview
 
 This repo contains code for investigating the potential efficacy of ring
 vaccination for a disease interactively via a [streamlit](https://streamlit.io/)
 app.
 
-## Authors
+## Model description
 
-- Scott Olesen <ulp7@cdc.gov>
-- Andy Magee <rzg0@cdc.gov>
-- Paige Miller <yub1@cdc.gov>
+- Disease progression: susceptible, exposed (i.e., will go onto infection),
+  infectious, recovered
+- Individuals make contacts on some network, with some effective (i.e.,
+  infection transmitting) contact rate. (Contact rates and effective contact
+  probability could be separated in parameter input, but they are perfectly
+  confounded in the model.)
+- Each infected individual can be detected. E.g., infected people might notice
+  their own symptoms.
+- When an infected person is detected, contact tracing and isolation are
+  initiated.
+  - Contact tracing
+    - Contact tracing can detect infections among contacts, contacts of
+      contacts, etc.
+    - Contact tracing has different performance characteristics for each "ring."
+      (The most straightforward choice would be to make second ring performance
+      equivalent to first ring, i.e., time from detecting infected contact to
+      infected contact-of-contact is identical to time from detecting index
+      infection to infected contact.)
+  - Isolation reduces transmission by some factor (which might be 100%) for that
+    individual.
+- Input parameters/assumptions for this model
+  - Latent period $t_\mathrm{latent}$ distribution (time from contact to onset
+    of infectiousness)
+  - Infectious period $t_\mathrm{inf}$ distribution
+  - Basic reproductive number $R_0$ (i.e., mean number of secondary infections
+    per index infection in the absence of intervention)
+    - Note: this defines some mean infectious rate $R_0 / E[t_\mathrm{inf}]$
+    - Assume that this infectious rate is constant over the period of
+      infectiousness. E.g., if perfectly effective isolation is implemented
+      halfway through an individual's infectious period, that halves their
+      number of expected secondary infections.
+    - Some distribution of number of secondary infections around $R_0$ (e.g.,
+      Poisson)
+    - Assume that the number of secondary infections is uncorrelated across
+      individuals (i.e., there is some kind of homogeneity in the contact
+      network).
+  - Per-infection detection (aka "passive" detection, in which individuals
+    identify their own symptoms)
+    - % of infections identified in this way (in the absence of contact tracing)
+    - Distribution of times from exposure to detection (or, equivalently, from
+      exposure to symptom onset and from symptom onset to detection)
+  - Contact tracing
+    - % of first ring (contacts) identified
+    - Distribution of times from index exposure to contact identification
+    - Time-varying performance of contact tracing (e.g., a simple assumption
+      would be that all infected contacts immediately stop infecting, i.e., that
+      the diagnostic test can identify infections with 100% sensitivity
+      immediately after exposure and isolation is 100% effective)
+    - % of second ring (contacts of contacts) identified, distribution of times,
+      etc.
+    - Third ring, etc.
+- Implementation/initialization
+  - Seed a single infection (e.g., exposed via travel)
+  - **_Open question_**: How to deal with multiple rings?
+    - What are the network implications of treating undetected infections as new
+      index infections (with independent but identically distributed number of
+      secondary infections)?
+    - How hard would it be to simulate contacts on a simple network?
+- Output/viz
+  - Some discrete realizations, showing the timelines of events for individuals
+    (e.g., how the different disease state periods line up in time)
+  - Distribution of number of undetected
+- Assumptions of note
+  - Assuming independence is conservative: clustering helps you
+
+## Project Admins
+
+- Scott Olesen (CDC/CFA) <ulp7@cdc.gov>
+- Andy Magee (CDC/CFA) <rzg0@cdc.gov>
+- Paige Miller (CDC/CFA) <yub1@cdc.gov>
 
 ## General Disclaimer
 
