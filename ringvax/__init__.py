@@ -24,6 +24,7 @@ class Simulation:
         self.seed = seed
         self.rng = numpy.random.default_rng(self.seed)
         self.infections = {}
+        self.termination = {}
 
     def create_person(self) -> str:
         """Add a new person to the data"""
@@ -66,6 +67,7 @@ class Simulation:
         # queue is pairs (t_exposed, infector)
         # start with the index infection
         infection_queue: List[tuple[float, Optional[str]]] = [(0.0, None)]
+        termination = {"criterion": "", "last_complete_generation": -1}
 
         while (
             len(infection_queue) > 0
@@ -79,6 +81,14 @@ class Simulation:
             id = self.create_person()
             self.generate_infection(id=id, t_exposed=t_exposed, infector=infector)
 
+            if (
+                len(infection_queue) == 0
+                and len(self.get_person_property(id, "infection_times")) == 0
+            ):
+                termination["criterion"] = "extinction"
+                termination["last_complete_generation"] = max(
+                    self.infections[id]["generation"] for id in self.infections
+                )
             # add the infections they caused to the end of the queue,
             # unless we are past the number of generations
             if (
@@ -89,6 +99,20 @@ class Simulation:
                 # the max. # of infections
                 for t in self.get_person_property(id, "infection_times"):
                     bisect.insort_right(infection_queue, (t, id), key=lambda x: x[0])
+
+            if len(self.query_people()) >= self.params["max_infections"]:
+                termination["criterion"] = "max_infections"
+                min_in_progress = min(
+                    self.infections[parent]["generation"]
+                    for _, parent in infection_queue
+                )
+                termination["last_complete_generation"] = min_in_progress - 1
+
+        if termination["criterion"] == "":
+            termination["criterion"] = "max_generations"
+            termination["last_complete_generation"] = self.params["n_generations"]
+
+        self.termination = termination
 
     def generate_infection(
         self, id: str, t_exposed: float, infector: Optional[str]
