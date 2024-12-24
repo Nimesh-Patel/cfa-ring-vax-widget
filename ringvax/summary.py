@@ -65,6 +65,7 @@ def _prepare_for_df(infection: dict) -> dict:
     }
 
 
+@np.errstate(invalid="ignore")
 def summarize_detections(df: pl.DataFrame) -> pl.DataFrame:
     """
     Get marginal detection probabilities from simulations.
@@ -93,13 +94,15 @@ def summarize_detections(df: pl.DataFrame) -> pl.DataFrame:
 
     return pl.DataFrame(
         {
-            "prob_detect": 1.0 - count_nodetect / n_infections,
-            "prob_active": count_active / n_active_eligible,
-            "prob_passive": count_passive / n_infections,
-            "prob_detect_before_infectious": df.filter(pl.col("detected"))
-            .filter(pl.col("t_detected") < pl.col("t_infectious"))
-            .shape[0]
-            / n_infections,
+            "prob_detect": 1.0 - np.divide(count_nodetect, n_infections),
+            "prob_active": np.divide(count_active, n_active_eligible),
+            "prob_passive": np.divide(count_passive, n_infections),
+            "prob_detect_before_infectious": np.divide(
+                df.filter(pl.col("detected"))
+                .filter(pl.col("t_detected") < pl.col("t_infectious"))
+                .shape[0],
+                n_infections,
+            ),
         }
     )
 
