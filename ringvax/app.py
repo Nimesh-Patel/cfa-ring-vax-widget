@@ -2,13 +2,13 @@ import time
 from typing import List, Optional
 
 import altair as alt
-import graphviz
 import numpy as np
 import numpy.random
 import polars as pl
 import streamlit as st
 
 from ringvax import Simulation
+from ringvax.plot import plot_simulation
 from ringvax.summary import (
     get_all_person_properties,
     get_total_infection_count_df,
@@ -70,26 +70,8 @@ def render_percents(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def make_graph(sim: Simulation) -> graphviz.Digraph:
-    """Make a transmission graph"""
-    graph = graphviz.Digraph()
-    for infectee in sim.query_people():
-        infector = sim.get_person_property(infectee, "infector")
-
-        color = (
-            "black" if not sim.get_person_property(infectee, "detected") else "#068482"
-        )
-
-        graph.node(str(infectee), color=color)
-
-        if infector is not None:
-            graph.edge(str(infector), str(infectee))
-
-    return graph
-
-
 @st.fragment
-def show_graph(sims: List[Simulation], pause: float = 0.1):
+def show_graph(sims: List[Simulation], annotate_generation: bool, pause: float = 0.1):
     """Show a transmission graph. Wrap as st.fragment, to not re-run simulations.
 
     Args:
@@ -102,7 +84,9 @@ def show_graph(sims: List[Simulation], pause: float = 0.1):
     )
     placeholder = st.empty()
     time.sleep(pause)
-    placeholder.graphviz_chart(make_graph(sims[idx]))
+    placeholder.pyplot(
+        plot_simulation(sims[idx], {"annotate_generation": annotate_generation})
+    )
 
 
 def format_control_gens(gen: int):
@@ -296,6 +280,7 @@ def app():
             )
             seed = st.number_input("Random seed", value=1234, step=1)
             nsim = st.number_input("Number of simulations", value=250, step=1)
+            plot_gen = st.toggle("Show infection's generation", value=False)
 
     params = {
         "n_generations": n_generations,
@@ -404,7 +389,19 @@ def app():
 
         with tab2:
             st.header("Graph of infections")
-            show_graph(sims=sims)
+            st.text(
+                (
+                    "In these figures, each horizontal line is an infection, with the stage denoted "
+                    "by the color (blue for initial exposed period, red for subsequent infectious period). "
+                    "The x-axis is time, with t=0 the time the index case is exposed. "
+                    "Vertical black lines link infections with the infections they cause at the time of exposure. "
+                    "Unsimulated infections (those caused by the final completely-simulated generation) "
+                    "are denoted with blue vertical tick marks."
+                    "Infections which are detected have the counterfactual (unrealized) portion of their "
+                    "history shown in transparency. Active detections are highlighted with black triangles. "
+                )
+            )
+            show_graph(sims=sims, annotate_generation=plot_gen)
 
 
 if __name__ == "__main__":
