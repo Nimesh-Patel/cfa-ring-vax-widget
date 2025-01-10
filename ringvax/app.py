@@ -1,3 +1,4 @@
+import subprocess
 import time
 from typing import List, Optional
 
@@ -159,6 +160,18 @@ def set_session_default(key, value) -> None:
         st.session_state[key] = value
 
 
+def get_commit(length: int = 15) -> Optional[str]:
+    x = subprocess.run(
+        ["git", "rev-parse", f"--short={length}", "HEAD"], capture_output=True
+    )
+    if x.returncode == 0:
+        commit = x.stdout.decode().strip()
+        assert len(commit) == length
+        return commit
+    else:
+        return None
+
+
 def app():
     st.info(
         "This interactive application is a prototype designed for software testing and educational purposes."
@@ -281,6 +294,10 @@ def app():
             seed = st.number_input("Random seed", value=1234, step=1)
             nsim = st.number_input("Number of simulations", value=250, step=1)
             plot_gen = st.toggle("Show infection's generation", value=False)
+
+        commit = get_commit()
+        if commit is not None:
+            st.caption(f"App version: {commit}")
 
     params = {
         "n_generations": n_generations,
