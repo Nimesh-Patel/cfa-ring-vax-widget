@@ -12,7 +12,7 @@ from ringvax import Simulation
 from ringvax.plot import plot_simulation
 from ringvax.summary import (
     get_all_person_properties,
-    get_total_infection_count_df,
+    get_infection_counts_by_generation,
     prob_control_by_gen,
     summarize_detections,
     summarize_infections,
@@ -63,7 +63,7 @@ def render_percents(df: pl.DataFrame) -> pl.DataFrame:
         .then(pl.lit("Not a number"))
         .otherwise(
             pl.col(col).map_elements(
-                lambda x: f"{round(x):.0f}%", return_dtype=pl.String
+                lambda x: f"{round(x * 100):.0f}%", return_dtype=pl.String
             )
         )
         .alias(col)
@@ -302,6 +302,20 @@ def app():
         if commit is not None:
             st.caption(f"App version: {commit}")
 
+            plot_gen = st.segmented_control(
+                "Generation to plot",
+                options=range(1, n_generations + 1),
+                default=n_generations,
+            )
+            cumulative = (
+                st.segmented_control(
+                    "Show infections cumulatively or in specific generation?",
+                    options=["Cumulative", "In generation"],
+                    default="Cumulative",
+                )
+                == "Cumulative"
+            )
+
     params = {
         "n_generations": n_generations,
         "latent_duration": latent_duration,
@@ -367,16 +381,32 @@ def app():
                 help=f"The probability that there are no infections in the {format_control_gens(control_generations)}, or equivalently that the {format_control_gens(control_generations - 1)} do not produce any further infections.",
             )
 
-            st.header("Number of infections")
-            st.write(
-                f"Distribution of the total number of infections seen in {n_generations} generations."
+            st.header(
+                "Number of infections",
+                help="This is a histogram describing the distribution of the number of infections. You can change what is plotted here in the Advanced Settings.",
+            )
+            generational_counts = get_infection_counts_by_generation(sim_df)
+
+            if cumulative:
+                counts = (
+                    generational_counts.filter(pl.col("generation") <= plot_gen)
+                    .group_by("simulation")
+                    .agg(pl.col("num_infections").sum())
+                )
+            else:
+                counts = generational_counts.filter(pl.col("generation") == plot_gen)
+
+            x_lab = (
+                f"Cumulative infections through generation {plot_gen}"
+                if cumulative
+                else f"Number of infections in generation {plot_gen}"
             )
             st.altair_chart(
-                alt.Chart(get_total_infection_count_df(sim_df))
+                alt.Chart(counts)
                 .mark_bar()
                 .encode(
-                    x=alt.X("size:Q", bin=True, title="Number of infections"),
-                    y=alt.Y("count()", title="Count"),
+                    x=alt.X("num_infections:Q", bin=True, title=x_lab),
+                    y=alt.Y("count()", title="Number of simulations"),
                 )
             )
 
