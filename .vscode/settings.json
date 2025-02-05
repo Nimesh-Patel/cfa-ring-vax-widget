@@ -1,0 +1,10 @@
+{
+    "cmake.options.statusBarVisibility": "icon",
+    "cmake.additionalCompilerSearchDirs": [
+        ""
+    ],
+    "editor.tabSize": 4,
+    {
+        "python.defaultInterpreterPath": "C:\\Users\\cva2\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
+     }
+}
