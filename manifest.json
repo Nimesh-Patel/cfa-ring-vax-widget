@@ -1,0 +1,7 @@
+{
+    "appName": "Ringvax App",
+    "description": "A Streamlit app for Ringvax functionality.",
+    "mainScript": "ringvax/app.py",
+    "repository": "https://github.com/Nimesh-Patel/cfa-ring-vax-widget",
+    "authors": ["CFA"]
+  }
