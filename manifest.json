@@ -1,7 +1,17 @@
 {
-    "appName": "Ringvax App",
-    "description": "A Streamlit app for Ringvax functionality.",
-    "mainScript": "ringvax/app.py",
-    "repository": "https://github.com/Nimesh-Patel/cfa-ring-vax-widget",
-    "authors": ["CFA"]
+  "version": 1,
+  "locale": "en_US",
+  "platform": "python",
+  "metadata": {
+    "appMode": "python",
+    "entrypoint": "ringvax/app.py"
+  },
+  "python": {
+    "version": "3.9",
+    "package_manager": {
+      "name": "pip",
+      "version": "21.0",
+      "package_file": "requirements.txt"
+    }
   }
+}
