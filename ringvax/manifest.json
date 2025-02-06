@@ -13,6 +13,11 @@
       "package_file": "requirements.txt"
     }
   },
+  "platform": "linux",
+  "packages": {
+    "system": ["gdal-3.10.1"],
+    "python": ["GDAL>=3.10.1"]
+  },
   "files": {
     "requirements.txt": {
       "checksum": "7191627b4db0905a59edcc8e75fff1e4"
