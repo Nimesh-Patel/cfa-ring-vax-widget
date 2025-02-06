@@ -3,14 +3,14 @@
   "locale": "en_US",
   "platform": "python",
   "metadata": {
-    "appMode": "python",
+    "appMode": "api",
     "entrypoint": "ringvax/app.py"
   },
   "python": {
-    "version": "3.9",
+    "version": "3.12",
     "package_manager": {
       "name": "pip",
-      "version": "21.0",
+      "version": "24.0",
       "package_file": "requirements.txt"
     }
   }
