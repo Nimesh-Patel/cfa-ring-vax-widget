@@ -13,14 +13,9 @@
       "package_file": "requirements.txt"
     }
   },
-  "platform": "linux",
-  "packages": {
-    "system": ["gdal-3.10.1"],
-    "python": ["GDAL>=3.10.1"]
-  },
   "files": {
     "requirements.txt": {
-      "checksum": "7191627b4db0905a59edcc8e75fff1e4"
+      "checksum": "39849631f11906d913ed02b2d9177604"
     },
     "__init__.py": {
       "checksum": "3602168d2d354594cd394e6cf8acd5c2"
