@@ -57,6 +57,7 @@ fastjsonschema==2.21.1
 feedfinder2==0.0.4
 feedparser==6.0.11
 filelock==3.13.1
+GDAL>=3.1
 Fiona==1.9.3
 Flask==1.1.2
 Flask-Caching==1.9.0
