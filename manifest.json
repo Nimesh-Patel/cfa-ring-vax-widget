@@ -7,10 +7,10 @@
     "entrypoint": "ringvax/app.py"
   },
   "python": {
-    "version": "3.12",
+    "version": "3.9",
     "package_manager": {
       "name": "pip",
-      "version": "24.0",
+      "version": "23.0",
       "package_file": "requirements.txt"
     }
   }
